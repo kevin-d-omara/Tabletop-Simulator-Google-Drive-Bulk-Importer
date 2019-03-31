@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,7 +16,13 @@ namespace TTSBulkImporter.TabletopSimulator
         public enum GuidNameStyle
         {
             /// <summary>
-            /// "monsters = '123abc',
+            /// Puts the key in brackets and double quotes so that any characters can be used, including an invalid Lua variable name.
+            /// ["recon-team"] = '123abc',
+            /// </summary>
+            NameAsKeyWithBrackets,
+
+            /// <summary>
+            /// monsters = '123abc',
             /// </summary>
             NameAsKey,
 
@@ -52,7 +59,7 @@ namespace TTSBulkImporter.TabletopSimulator
         /// <summary>
         /// Add a list of GUIDs to the script.
         /// </summary>
-        public void AddGuids(IEnumerable<BaseGamePiece> gamePieces, GuidNameStyle nameStyle = GuidNameStyle.NameAsKey)
+        public void AddGuids(IEnumerable<BaseGamePiece> gamePieces, GuidNameStyle nameStyle = GuidNameStyle.NameAsKeyWithBrackets)
         {
             foreach (var piece in gamePieces)
             {
@@ -64,21 +71,32 @@ namespace TTSBulkImporter.TabletopSimulator
         /// <summary>
         /// Add a single GUID to the script.
         /// </summary>
-        private void AddGuid(BaseGamePiece gamePiece, GuidNameStyle nameStyle = GuidNameStyle.NameAsKey)
+        private void AddGuid(BaseGamePiece gamePiece, GuidNameStyle nameStyle = GuidNameStyle.NameAsKeyWithBrackets)
         {
             var line = "    ";
             var guid = WrapInSingleQuotes(gamePiece.GUID);
             var name = AsValidLuaVariableName(gamePiece.Nickname);
 
-            // TODO: prepare name (strip whitespace and force first letter lower case)
-
-            if (nameStyle == GuidNameStyle.NoNameEver || String.IsNullOrWhiteSpace(gamePiece.Nickname))
+            if (String.IsNullOrWhiteSpace(gamePiece.Nickname))
                 line += guid;
             else
-                if (nameStyle == GuidNameStyle.NameAsKey)
-                    line += name + " = " + guid;
-                else // GuidNameStyle.NameAsComment
-                    line += guid + "   " + "-- " + name;
+                switch (nameStyle)
+                {
+                    case GuidNameStyle.NoNameEver:
+                        line += guid;
+                        break;
+                    case GuidNameStyle.NameAsKey:
+                        line += name + " = " + guid;
+                        break;
+                    case GuidNameStyle.NameAsComment:
+                        line += guid + "   " + "-- " + name;
+                        break;
+                    case GuidNameStyle.NameAsKeyWithBrackets:
+                        line += "[\"" + gamePiece.Nickname + "\"]" + " = " + guid;
+                        break;
+                    default:
+                        throw new InvalidEnumArgumentException();
+                }
 
             guids.AppendLine(line + comma);
         }
