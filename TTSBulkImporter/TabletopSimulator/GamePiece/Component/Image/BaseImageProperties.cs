@@ -2,7 +2,7 @@
 {
     public abstract class BaseImageProperties
     {
-        public float Thickness = 0.20f;
+        public float Thickness = 0.16f;
         public bool Stackable = false;
     }
 }
