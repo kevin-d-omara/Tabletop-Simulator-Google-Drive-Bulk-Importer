@@ -15,4 +15,4 @@ Performs the following:
 
 ## Developer Setup
 *todo*
-* Get `credentials.json` as explained here: https://steamcommunity.com/sharedfiles/filedetails/?id=1693445718
+* Get `client_secret.json` as [explained here](https://developers.google.com/drive/api/v3/quickstart/dotnet) and put it into the folder `TTSBulkImporter`.
