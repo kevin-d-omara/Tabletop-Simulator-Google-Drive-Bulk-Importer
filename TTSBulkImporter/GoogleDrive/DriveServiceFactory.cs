@@ -42,7 +42,7 @@ namespace TTSBulkImporter.GoogleDrive
                     "user",
                     CancellationToken.None,
                     new FileDataStore(credPath, true)).Result;
-                Console.WriteLine("Credential file saved to: " + credPath);
+                Console.WriteLine("Sign in successful, credential file saved to: " + credPath);
             }
 
             return credential;

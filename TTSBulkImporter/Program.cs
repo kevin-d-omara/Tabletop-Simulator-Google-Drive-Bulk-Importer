@@ -1,32 +1,15 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Apis.Drive.v3;
-using Google.Apis.Drive.v3.Data;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using TTSBulkImporter.GoogleDrive;
 using TTSBulkImporter.Importer;
-using TTSBulkImporter.TabletopSimulator.GamePiece;
 using TTSBulkImporter.TabletopSimulator.GamePiece.Component;
+using Newtonsoft.Json.Linq;
 
 namespace TTSBulkImporter
 {
     static class Program
     {
-        private const string TestFolder         = "1K8i84c5EUcjYy8vRy8LFMjnVTvuSlY6S";
-
-        private const string BattlegroundSet1   = "1p6RHV9lbNZJaTfSmaOVAR1kcYRAeT17n";
-
-        private const string CoreBox            = "1Aw4ggc4S5ixhDZXsfforSQZGIAKvWM5t";
-        private const string CoreTerrain        = "1Ie0V5KTu5CaWpcdOaXrCYR3ikA-Ms0Xc";
-        private const string CoreUS             = "1MFB9Af7iBfDSSpotWGUpysDpYOuEYWhW";
-        private const string CoreGE             = "16FuXA_0ZDSEHsFRJpDYaFuO07bWj7NXa";
-        private const string CoreTokens         = "104hH2JOSLGXOXLFPEMMQ3P1aGnxHf6Kx";
-
         // -- hacks
         private static readonly ColorDiffuse ColorTintUS            = new ColorDiffuse(0.411764681f, 0.517647f, 0.301960766f); // hex: 69844d
         private static readonly ColorDiffuse ColorTintGE            = new ColorDiffuse(0.266666667f, 0.294118f, 0.309803922f); // hex: 444b4f
@@ -39,9 +22,9 @@ namespace TTSBulkImporter
         static void Main(string[] args)
         {
             // Args
-            var folderId = BattlegroundSet1;
+            var folderId = "1G_g0GFAJxaL9GkW4SqgNiQPJ2CGZuSbQ";
             var tintColor = ColorTintTerrainBoard;
-
+            var outputFileName = "_battleground-4.json";
 
             // Fetch GoogleDrive filesystem
             var service = GetDriveService();
@@ -54,30 +37,26 @@ namespace TTSBulkImporter
             var converter = new Converter();
             converter.TintColor = tintColor;
             var bag = converter.ConvertFolderToBag(modRootFolder);
-            SerializeToJsonAndPrint(bag);
+            var compactJson = JsonConvert.SerializeObject(bag);
+            var prettyJson = JToken.Parse(compactJson).ToString(Formatting.Indented);
 
+            // Write JSON to disk and display on console
+            WriteJsonToDisk(prettyJson, outputFileName);
 
             CloseProgram();
+        }
+
+        private static void WriteJsonToDisk(string json, string outputFileName)
+        {
+            var outputFilePath = Path.Combine(Directory.GetCurrentDirectory(), outputFileName);
+            Console.WriteLine("Saving JSON to file: " + outputFilePath);
+            File.WriteAllText(outputFilePath, json);
         }
 
         private static DriveScanner GetDriveService()
         {
             var service = DriveServiceFactory.CreateDriveService(AppConfig.DriveScopes, AppConfig.ApplicationName);
             return new DriveScanner(service);
-        }
-
-        private static void SerializeToJsonAndPrint<T>(T obj, bool alsoShowPretty = false)
-        {
-            var compactJson = JsonConvert.SerializeObject(obj);
-            Console.WriteLine(compactJson);
-
-            if (alsoShowPretty)
-            {
-                var prettyJson = JToken.Parse(compactJson).ToString(Formatting.Indented);
-                Console.WriteLine(prettyJson);
-            }
-
-//            var deserialized = JsonConvert.DeserializeObject<T>(compactJson);
         }
 
         private static void CloseProgram()
