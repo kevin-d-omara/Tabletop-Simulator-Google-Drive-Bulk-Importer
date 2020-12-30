@@ -11,12 +11,13 @@ namespace TTSBulkImporter
     static class Program
     {
         // -- hacks
-        private static readonly ColorDiffuse ColorTintUS            = new ColorDiffuse(0.411764681f, 0.517647f, 0.301960766f); // hex: 69844d
-        private static readonly ColorDiffuse ColorTintGE            = new ColorDiffuse(0.266666667f, 0.294118f, 0.309803922f); // hex: 444b4f
-        private static readonly ColorDiffuse ColorTintCW            = new ColorDiffuse(0.443137255f, 0.372549f, 0.278431373f); // hex: 715f47
-        private static readonly ColorDiffuse ColorTintFFI           = new ColorDiffuse(0.576470588f, 0.545098f, 0.509803922f); // hex: 938b82
-        private static readonly ColorDiffuse ColorTintCivilian      = new ColorDiffuse(0.752941176f, 0.733333f, 0.717647059f); // hex: c0bbb7
-        private static readonly ColorDiffuse ColorTintTerrainBoard  = new ColorDiffuse(0.415686275f, 0.450980f, 0.196078431f); // hex: 6A7332
+        private static readonly ColorDiffuse ColorTintUS = new ColorDiffuse(0.39607808f, 0.5058824f, 0.286274165f); // hex: 648148
+        private static readonly ColorDiffuse ColorTintGE = new ColorDiffuse(0.2666619f, 0.294113219f, 0.3097992f); // hex: 434A4E
+        private static readonly ColorDiffuse ColorTintCW = new ColorDiffuse(0.443134367f, 0.3725461f, 0.2784285f); // hex: 705E46
+        private static readonly ColorDiffuse ColorTintFFI = new ColorDiffuse(0.576470554f, 0.545097947f, 0.509800732f); // hex: 928A81
+        private static readonly ColorDiffuse ColorTintCustomization = new ColorDiffuse(0.2941174f, 0.450980365f, 0.407842875f); // hex: 4A7267
+        private static readonly ColorDiffuse ColorTintTerrainBoard = new ColorDiffuse(0.407842726f, 0.443136871f, 0.1882349f); // hex: 67702F
+        private static readonly ColorDiffuse ColorTintCivilian = ColorTintFFI;
         private static readonly ColorDiffuse ColorTintDefault       = new ColorDiffuse();
         // -- end hacks
 
