@@ -34,7 +34,7 @@ namespace TTSBulkImporter.Importer
         public ColorDiffuse TintColor = new ColorDiffuse();
         // -- end hacks
 
-        public BagGamePiece ConvertFolderToBag(DriveFolder driveFolder)
+        public BagGamePiece ConvertFolderToBag(DriveFolder driveFolder, bool addLuaScript=true)
         {
             var bag = new BagGamePiece();
             bag.Nickname = driveFolder.Name;
@@ -47,7 +47,7 @@ namespace TTSBulkImporter.Importer
             // Create TTS objects.
             var tokens = tokenFiles.Select(ConvertToToken).ToList();
             var tiles = ConvertToTiles(tileFiles).ToList();
-            var bags = driveFolder.Folders.Select(ConvertFolderToBag).ToList();
+            var bags = driveFolder.Folders.Select(x => ConvertFolderToBag(x, addLuaScript)).ToList();
 
             // Add objects to bag.
             bag.ContainedObjects = bag.ContainedObjects
@@ -57,11 +57,14 @@ namespace TTSBulkImporter.Importer
                 .ToList();
 
             // Add script w/ GUIDs to this bag.
-            var script = new LuaScript();
-            script.AddGuids(tokens);
-            script.AddGuids(tiles);
-            script.AddGuids(bags);
-            bag.LuaScript = script.GetScript();
+            if (addLuaScript)
+            {
+                var script = new LuaScript();
+                script.AddGuids(tokens);
+                script.AddGuids(tiles);
+                script.AddGuids(bags);
+                bag.LuaScript = script.GetScript();
+            }
 
             // Clear Nicknames (they were only used for generating LuaScript named GUIDs).
             tokens.ForEach(token => token.Nickname = "");

@@ -39,7 +39,7 @@ namespace TTSBulkImporter
             // Convert filesystem to TTS Json
             var converter = new Converter();
             converter.TintColor = tintColor;
-            var bag = converter.ConvertFolderToBag(modRootFolder);
+            var bag = converter.ConvertFolderToBag(modRootFolder, addLuaScript: false);
             var compactJson = JsonConvert.SerializeObject(bag);
             var prettyJson = JToken.Parse(compactJson).ToString(Formatting.Indented);
 
