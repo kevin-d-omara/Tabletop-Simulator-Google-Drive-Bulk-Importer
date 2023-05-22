@@ -11,6 +11,7 @@ namespace TTSBulkImporter
     static class Program
     {
         // -- hacks
+        private static readonly ColorDiffuse ColorTintPink = new ColorDiffuse(1.0f, 0.4f, 1.0f); // hex: ff66ff
         private static readonly ColorDiffuse ColorTintUS = new ColorDiffuse(0.39607808f, 0.5058824f, 0.286274165f); // hex: 648148
         private static readonly ColorDiffuse ColorTintGE = new ColorDiffuse(0.2666619f, 0.294113219f, 0.3097992f); // hex: 434A4E
         private static readonly ColorDiffuse ColorTintCW = new ColorDiffuse(0.443134367f, 0.3725461f, 0.2784285f); // hex: 705E46
@@ -25,7 +26,7 @@ namespace TTSBulkImporter
         {
             // Args
             var folderId = "1G_g0GFAJxaL9GkW4SqgNiQPJ2CGZuSbQ";
-            var tintColor = ColorTintTerrainBoard;
+            var tintColor = ColorTintPink;
             var outputFileName = "_battleground-4.json";
 
             // Fetch GoogleDrive filesystem
