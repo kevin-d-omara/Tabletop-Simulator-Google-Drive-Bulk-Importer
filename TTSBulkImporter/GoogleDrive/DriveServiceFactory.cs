@@ -35,7 +35,8 @@ namespace TTSBulkImporter.GoogleDrive
                 var credPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
                 credPath = Path.Combine(credPath, ".credentials/drive-dotnet-quickstart.json");
 
-                Console.WriteLine("Please sign in to continue.");
+                Console.WriteLine("Please sign in to continue. Check your browser for the sign-in page.");
+
                 credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
                     scopes,
