@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TTSBulkImporter.GoogleDrive;
 using TTSBulkImporter.TabletopSimulator;
 using TTSBulkImporter.TabletopSimulator.GamePiece;
@@ -14,10 +12,9 @@ namespace TTSBulkImporter.Importer
 {
     /// <summary>
     /// Converts a Google Drive folder to a Tabletop Simulator bag.
-    /// 
-    /// <seealso cref="TTSBulkImporter.GoogleDrive.DriveFolder"/>
-    /// <seealso cref="TTSBulkImporter.TabletopSimulator.GamePiece.BagGamePiece"/>
     /// </summary>
+    /// <seealso cref="DriveFolder"/>
+    /// <seealso cref="BagGamePiece"/>
     public class Converter
     {
         private readonly List<string> allowableExtensions = new List<string>

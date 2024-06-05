@@ -20,8 +20,6 @@ namespace TTSBulkImporter.GoogleDrive
             Service = service;
         }
 
-
-
         /// <summary>
         /// Return the entire hierarchy of files and folders beginning at provided folder.
         /// Does not include trashed files and folders.
@@ -76,8 +74,6 @@ namespace TTSBulkImporter.GoogleDrive
             }
         }
 
-
-
         /// <summary>
         /// Return the files and folders contained immediately within the provided folder.
         /// Does not include trashed files and folders.
@@ -109,9 +105,9 @@ namespace TTSBulkImporter.GoogleDrive
             Console.WriteLine("Created permission: 'Anyone with the link can view.' on file: " + fileId);
         }
 
-
-
-        // For testing only.
+        /// <summary>
+        /// For testing only.
+        /// </summary>
         public void PrettyPrintFileList(IEnumerable<Google.Apis.Drive.v3.Data.File> files)
         {
             Console.WriteLine("Files:");

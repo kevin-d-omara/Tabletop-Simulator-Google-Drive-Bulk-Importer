@@ -1,7 +1,7 @@
 ﻿namespace TTSBulkImporter.GoogleDrive
 {
     /// <summary>
-    /// A Google Drive folder.
+    /// A Google Drive file.
     /// </summary>
     public class DriveFile
     {

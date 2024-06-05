@@ -19,7 +19,7 @@ namespace TTSBulkImporter
         private static readonly ColorDiffuse ColorTintCustomization = new ColorDiffuse(0.2941174f, 0.450980365f, 0.407842875f); // hex: 4A7267
         private static readonly ColorDiffuse ColorTintTerrainBoard = new ColorDiffuse(0.407842726f, 0.443136871f, 0.1882349f); // hex: 67702F
         private static readonly ColorDiffuse ColorTintCivilian = ColorTintFFI;
-        private static readonly ColorDiffuse ColorTintDefault       = new ColorDiffuse();
+        private static readonly ColorDiffuse ColorTintDefault = new ColorDiffuse();
         // -- end hacks
 
         static void Main(string[] args)

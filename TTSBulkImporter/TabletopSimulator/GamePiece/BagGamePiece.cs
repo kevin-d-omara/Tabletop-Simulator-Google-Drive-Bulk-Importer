@@ -11,8 +11,7 @@ namespace TTSBulkImporter.TabletopSimulator.GamePiece
 
         public BagGamePiece()
         {
-            // Default brown colored bag in TSS.
-            ColorDiffuse = new ColorDiffuse(0.7058823f, 0.366520882f, 0.0f);
+            ColorDiffuse = ColorDiffuse.Colors.Brown;
         }
     }
 }

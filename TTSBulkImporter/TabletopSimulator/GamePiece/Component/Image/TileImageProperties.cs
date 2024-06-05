@@ -2,7 +2,7 @@
 {
     public class TileImageProperties : BaseImageProperties
     {
-        public TileType Type = TileType.Rounded;    // I'm cheating, don't look at me!!
+        public TileType Type = TileType.Rounded;
         public bool Stretch = true;
 
         public enum TileType

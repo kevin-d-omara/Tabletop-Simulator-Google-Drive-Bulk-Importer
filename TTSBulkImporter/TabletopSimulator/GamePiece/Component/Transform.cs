@@ -7,7 +7,7 @@
         public readonly float posZ = 0f;
 
         public readonly float rotX = 0f;
-        public readonly float rotY = 180f;  // TODO: explain why this number is not 0f.
+        public readonly float rotY = 180f; // Defaults to 180 instead of 0 so that the image will be face-up to the default TTS camera.
         public readonly float rotZ = 0f;
 
         public readonly float scaleX = 1f;

@@ -2,6 +2,6 @@
 {
     public class TileImage : BaseImage
     {
-        public TileImageProperties CustomTile    = new TileImageProperties();
+        public TileImageProperties CustomTile = new TileImageProperties();
     }
 }

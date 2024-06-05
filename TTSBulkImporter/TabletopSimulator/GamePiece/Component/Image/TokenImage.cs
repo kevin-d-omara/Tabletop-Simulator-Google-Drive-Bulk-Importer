@@ -2,6 +2,6 @@
 {
     public class TokenImage : BaseImage
     {
-        public TokenImageProperties CustomToken   = new TokenImageProperties();
+        public TokenImageProperties CustomToken = new TokenImageProperties();
     }
 }

@@ -8,27 +8,27 @@ namespace TTSBulkImporter.TabletopSimulator.GamePiece
         public abstract string Name { get; }    // Custom_Tile, Custom_Model, etc.
 
         // User Name/Description
-        public string Nickname     = "";
-        public string Description  = "";
+        public string Nickname = "";
+        public string Description = "";
 
         // Physical Properties
-        public Transform Transform         = new Transform();
-        public ColorDiffuse ColorDiffuse   = new ColorDiffuse();
+        public Transform Transform = new Transform();
+        public ColorDiffuse ColorDiffuse = new ColorDiffuse();
 
         // Toggles
-        public bool Locked         = false;
-        public bool Grid           = true;
-        public bool Snap           = true;
-        public bool Autoraise      = true;
-        public bool Sticky         = true;
-        public bool Tooltip        = true;
+        public bool Locked = false;
+        public bool Grid = true;
+        public bool Snap = true;
+        public bool Autoraise = true;
+        public bool Sticky = true;
+        public bool Tooltip = true;
         public bool GridProjection = false;
-        public bool Hands          = false;
+        public bool Hands = false;
 
         // Scripting
-        public string XmlUI            = "";
-        public string LuaScript        = "";
-        public string LuaScriptState   = "";
-        public string GUID             = GuidProvider.NewGuid();
+        public string XmlUI = "";
+        public string LuaScript = "";
+        public string LuaScriptState = "";
+        public string GUID = GuidProvider.NewGuid();
     }
 }
