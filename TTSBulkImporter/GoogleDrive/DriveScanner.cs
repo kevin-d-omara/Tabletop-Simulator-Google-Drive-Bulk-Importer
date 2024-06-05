@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
+using Google.Apis.Requests;
 using File = Google.Apis.Drive.v3.Data.File;
 
 namespace TTSBulkImporter.GoogleDrive
@@ -75,19 +77,19 @@ namespace TTSBulkImporter.GoogleDrive
         }
 
         /// <summary>
-        /// Return the files and folders contained immediately within the provided folder.
-        /// Does not include trashed files and folders.
+        /// Return the files and folders contained immediately within the provided folder (i.e. non-recursively).
+        /// Does not include trashed files.
         /// </summary>
         private IEnumerable<File> GetItemsInFolder(string folderFileId)
         {
-            FilesResource.ListRequest listRequest = Service.Files.List();
-            listRequest.Q = "parents in '" + folderFileId + "'";
-            listRequest.Fields = "files(id, name, mimeType, trashed)";
+            FilesResource.ListRequest request = Service.Files.List();
+            request.PageSize = 1000;
+            request.Q = $"'{folderFileId}' in parents and trashed=false";
+            request.Fields = "files(id, name, mimeType)";
 
-            var files = listRequest.Execute().Files;
-            var nonTrashedFiles = files.Where(file => file.Trashed.HasValue && !(bool)file.Trashed);
+            var response = request.Execute();
 
-            return nonTrashedFiles;
+            return response.Files;
         }
 
         /// <summary>
