@@ -90,7 +90,9 @@
     <Compile Include="GoogleDrive\DriveFolder.cs" />
     <Compile Include="GoogleDrive\DriveServiceFactory.cs" />
     <Compile Include="GoogleDrive\DriveScanner.cs" />
+    <Compile Include="GoogleDrive\MimeTypes.cs" />
     <Compile Include="GoogleDrive\PermissionData.cs" />
+    <Compile Include="HeroesSystemConfig.cs" />
     <Compile Include="Importer\Converter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -108,6 +110,8 @@
     <Compile Include="TabletopSimulator\GamePiece\Component\Transform.cs" />
     <Compile Include="TabletopSimulator\GuidProvider.cs" />
     <Compile Include="TabletopSimulator\LuaScript.cs" />
+    <Compile Include="TabletopSimulator\SaveFile.cs" />
+    <Compile Include="TabletopSimulator\Utils\Filesystem.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

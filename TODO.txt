@@ -1,6 +1,5 @@
 # Features:
 1. Add an optional flag for the program to do a natural sort of the files in each folder, then automatically match consecutive files together as Side A and Side B (without needing the .A and .B extension).
-1. Make the program output a complete TTS file instead of only a partial file.
 
 # Bugs:
 1. When a Google Drive Folder has more than 99 files, it will error with "number of Side A and Side B does not match". This is because the code only processes 99 files at a time.

@@ -35,7 +35,7 @@ namespace TTSBulkImporter.GoogleDrive
             {
                 throw new ArgumentException("The provided folder is trashed.");
             }
-            if (rootFile.MimeType != "application/vnd.google-apps.folder")
+            if (rootFile.MimeType != MimeTypes.Folder)
             {
                 throw new ArgumentException("The provided folder is NOT a folder. It is a :" + rootFile.MimeType);
             }
@@ -43,12 +43,12 @@ namespace TTSBulkImporter.GoogleDrive
 
             // Collect files and folders within root folder.
             var itemsInFolder = GetItemsInFolder(folderFileId);
-            var files = itemsInFolder.Where(file => file.MimeType != "application/vnd.google-apps.folder");
+            var files = itemsInFolder.Where(file => file.MimeType != MimeTypes.Folder);
             foreach (var file in files)
             {
                 rootDriveFolder.Files.Add(new DriveFile(file.Name, file.Id));
             }
-            var folders = itemsInFolder.Where(file => file.MimeType == "application/vnd.google-apps.folder");
+            var folders = itemsInFolder.Where(file => file.MimeType == MimeTypes.Folder);
             foreach (var folder in folders)
             {
                 rootDriveFolder.Folders.Add(GetFilesystemFrom(folder.Id));

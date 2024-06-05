@@ -17,6 +17,11 @@ namespace TTSBulkImporter.Importer
     /// <seealso cref="BagGamePiece"/>
     public class Converter
     {
+        /// <summary>
+        /// The tint color that will be applied to all game objects created from Google Drive.
+        /// </summary>
+        public ColorDiffuse TintColor { get; } = ColorDiffuse.Colors.Default;
+
         private readonly List<string> allowableExtensions = new List<string>
         {
             ".png",
@@ -27,14 +32,24 @@ namespace TTSBulkImporter.Importer
         private Regex sideBPattern = new Regex(@"(\.B)");   // Filename contains '.B', ex: Recon.B.png
         private Regex tokenPattern = new Regex(@"(\.token)", RegexOptions.IgnoreCase);  // Filename contains '.token', ex: Smoke.token.png, Smoke Marker.token.png
 
-        // -- hacks
-        public ColorDiffuse TintColor = new ColorDiffuse();
-        // -- end hacks
+        private const float DefaultTableHeight = 0.77f;
 
-        public BagGamePiece ConvertFolderToBag(DriveFolder driveFolder, bool addLuaScript=true)
+        public Converter(ColorDiffuse tintColor)
+        {
+            TintColor = tintColor;
+        }
+
+        public BagGamePiece ConvertFolderToBag(DriveFolder driveFolder, bool isRoot = false, bool addLuaScript=false)
         {
             var bag = new BagGamePiece();
             bag.Nickname = driveFolder.Name;
+
+            if (isRoot)
+            {
+                // Raise the bag height so it rests naturally on the table-top.
+                // Otherwise it would "snap" up to the table when loading the mod.
+                bag.Transform.posY = DefaultTableHeight;
+            }
 
             // Filter down to image files.
             var validFiles = driveFolder.Files.Where(IsConvertableToGamePiece);

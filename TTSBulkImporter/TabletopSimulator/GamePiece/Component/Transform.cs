@@ -2,17 +2,17 @@
 {
     public class Transform
     {
-        public readonly float posX = 0f;
-        public readonly float posY = 0f;
-        public readonly float posZ = 0f;
+        public float posX = 0f;
+        public float posY = 0f;
+        public float posZ = 0f;
 
-        public readonly float rotX = 0f;
-        public readonly float rotY = 180f; // Defaults to 180 instead of 0 so that the image will be face-up to the default TTS camera.
-        public readonly float rotZ = 0f;
+        public float rotX = 0f;
+        public float rotY = 180f; // Defaults to 180 instead of 0 so that the image will be face-up to the default TTS camera.
+        public float rotZ = 0f;
 
-        public readonly float scaleX = 1f;
-        public readonly float scaleY = 1f;
-        public readonly float scaleZ = 1f;
+        public float scaleX = 1f;
+        public float scaleY = 1f;
+        public float scaleZ = 1f;
 
         public Transform() {}
 
