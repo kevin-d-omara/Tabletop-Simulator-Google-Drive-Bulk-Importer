@@ -43,6 +43,7 @@ namespace TTSBulkImporter.TabletopSimulator
             var outputDirectory = Utils.Filesystem.GetSolutionRootDirectory();
             var outputFilePath = Path.Combine(outputDirectory.FullName, filename);
 
+            Console.WriteLine("");
             Console.WriteLine("Saving JSON to file: " + outputFilePath);
             File.WriteAllText(outputFilePath, outputJson);
         }

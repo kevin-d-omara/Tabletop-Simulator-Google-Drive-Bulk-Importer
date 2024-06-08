@@ -1,14 +1,14 @@
 ﻿namespace TTSBulkImporter.GoogleDrive
 {
     /// <summary>
-    /// An object stored in Google Drive (typically a File or Folder).
+    /// An item stored in Google Drive (typically a File or Folder).
     /// </summary>
-    public abstract class DriveObject
+    public abstract class DriveItem
     {
         public string Name { get; }
         public string Id { get; }
 
-        public DriveObject(string name, string id)
+        public DriveItem(string name, string id)
         {
             Name = name;
             Id = id;

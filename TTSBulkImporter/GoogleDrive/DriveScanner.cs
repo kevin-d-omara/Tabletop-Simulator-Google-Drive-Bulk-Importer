@@ -26,8 +26,8 @@ namespace TTSBulkImporter.GoogleDrive
         }
 
         /// <summary>
-        /// Return the entire hierarchy of files and folders beginning at provided folder.
-        /// Does not include trashed files and folders.
+        /// Get the entire hierarchy of files and folders nested within the provided folder.
+        /// Excludes trashed files and folders.
         /// </summary>
         public DriveFolder GetFilesystemFrom(string folderFileId)
         {
@@ -64,15 +64,11 @@ namespace TTSBulkImporter.GoogleDrive
 
         /// <summary>
         /// Make all files and folders (including nested ones) publicly shareable so that "Anyone with the link can view."
-        /// This the same as clicking "Get shareable link" on each file and fodler in Google Drive.
+        /// This the same as clicking "Get shareable link" on each file and folder in Google Drive.
         /// </summary>
         public void MakeFilesystemShareable(DriveFolder rootFolder)
         {
-            List<DriveObject> filesAndFolders = new List<DriveObject>();
-            filesAndFolders.Add(rootFolder);
-            filesAndFolders.AddRange(rootFolder.Files);
-
-            BatchGrantPermissionAnyoneWithLinkTo(filesAndFolders);
+            BatchGrantPermissionAnyoneWithLinkTo(rootFolder);
 
             foreach (var folder in rootFolder.Folders)
             {
@@ -81,35 +77,8 @@ namespace TTSBulkImporter.GoogleDrive
         }
 
         /// <summary>
-        /// For testing only.
-        /// </summary>
-        public void PrettyPrintFileList(IEnumerable<Google.Apis.Drive.v3.Data.File> files)
-        {
-            Console.WriteLine("Files:");
-            if (files != null && files.Any())
-            {
-                foreach (var file in files)
-                {
-                    var fields = new List<string> { file.Name, file.MimeType };
-
-                    var builder = new StringBuilder();
-                    foreach (string item in fields)
-                    {
-                        builder.Append(item);
-                        builder.Append("\t");
-                    }
-                    Console.WriteLine(builder.ToString());
-                }
-            }
-            else
-            {
-                Console.WriteLine("No files found.");
-            }
-        }
-
-        /// <summary>
-        /// Return the files and folders contained immediately within the provided folder (i.e. non-recursively).
-        /// Does not include trashed files.
+        /// Get the files and folders contained immediately within the provided folder (i.e. not including nested items).
+        /// Excludes trashed items.
         /// </summary>
         private IEnumerable<File> GetItemsInFolder(string folderFileId)
         {
@@ -123,15 +92,24 @@ namespace TTSBulkImporter.GoogleDrive
             return response.Files;
         }
 
-        /// <summary>
-        /// Grants permission to all the provided files so that "Anyone with the link can view." This the same as clicking "Get shareable link" on each of those files in Google Drive.
-        /// </summary>
-        /// <param name="files">The files and folders to change permission for.</param>
-        private void BatchGrantPermissionAnyoneWithLinkTo(ICollection<DriveObject> files)
-        {
-            // TODO: Observe limits:
-            // Max 8,000 character limit on length of URL for each "inner request" (from https://developers.google.com/drive/api/guides/performance#batch-requests)
+        // TODO: Observe limits:
+        // Max 8,000 character limit on length of URL for each "inner request" (from https://developers.google.com/drive/api/guides/performance#batch-requests)
 
+        /// <summary>
+        /// Grant permission to the provided folder and it's contained files (excluding contained folders).
+        /// Permission is for "Anyone with the link can view." This the same as clicking "Get shareable link" on each of those files in Google Drive.
+        /// </summary>
+        private void BatchGrantPermissionAnyoneWithLinkTo(DriveFolder folder)
+        {
+            Console.WriteLine("");
+            Console.WriteLine($"Changing permission of folder \"{folder.Name}\" (ID: {folder.Id}) and it's {folder.Files.Count} contained files.");
+            Console.WriteLine($"(This may take up to 30 seconds. Batch Size: {MaxRequestsPerBatch} items.)");
+
+            List<DriveItem> files = new List<DriveItem>();
+            files.Add(folder);
+            files.AddRange(folder.Files);
+
+            bool isFirstChunk = true;
             foreach (var chunk in files.Chunk(MaxRequestsPerBatch))
             {
                 // Queue Requests:
@@ -160,11 +138,25 @@ namespace TTSBulkImporter.GoogleDrive
                 var task = batchRequest.ExecuteAsync();
                 task.Wait();
 
-                Console.WriteLine($"Changed permission of {files.Count} files to: 'Anyone with the link can view.'");
-                Console.WriteLine($"Files/Folders:");
-                foreach (var file in files)
+                Console.WriteLine($"Success!");
+                if (isFirstChunk)
                 {
-                    Console.WriteLine($"Name: {file.Name}, ID: {file.Id}");
+                    Console.WriteLine($"Changed permission of 1 folder and {chunk.Length - 1} files to: 'Anyone with the link can view.' =>");
+                    Console.WriteLine($"Folder: {chunk[0].Name}, ID: {chunk[0].Id}");
+                    foreach (var file in chunk.Skip(1))
+                    {
+                        Console.WriteLine($"File: {file.Name}, ID: {file.Id}");
+                    }
+
+                    isFirstChunk = false;
+                }
+                else
+                {
+                    Console.WriteLine($"Changed permission of {chunk.Length} files to: 'Anyone with the link can view.' =>");
+                    foreach (var file in chunk)
+                    {
+                        Console.WriteLine($"File: {file.Name}, ID: {file.Id}");
+                    }
                 }
             }
         }

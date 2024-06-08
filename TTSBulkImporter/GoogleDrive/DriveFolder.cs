@@ -5,7 +5,7 @@ namespace TTSBulkImporter.GoogleDrive
     /// <summary>
     /// A Google Drive folder.
     /// </summary>
-    public class DriveFolder : DriveObject
+    public class DriveFolder : DriveItem
     {
         public ICollection<DriveFile> Files = new List<DriveFile>();
         public ICollection<DriveFolder> Folders = new List<DriveFolder>();

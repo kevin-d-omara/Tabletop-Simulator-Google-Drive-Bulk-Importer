@@ -3,7 +3,7 @@
     /// <summary>
     /// A Google Drive file.
     /// </summary>
-    public class DriveFile : DriveObject
+    public class DriveFile : DriveItem
     {
         /// <summary>
         /// The link to download this file directly. Note: must enable public permissions separately.

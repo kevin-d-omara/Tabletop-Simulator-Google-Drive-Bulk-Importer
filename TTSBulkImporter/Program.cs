@@ -83,6 +83,7 @@ namespace TTSBulkImporter
 
         private static void CloseProgram()
         {
+            Console.WriteLine("");
             Console.WriteLine("Press any key to exit.");
             Console.Read();
         }
