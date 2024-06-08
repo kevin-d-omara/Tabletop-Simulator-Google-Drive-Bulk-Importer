@@ -33,7 +33,7 @@ namespace TTSBulkImporter
             ///                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             /// Then copy the part with ^^^^ and paste it below inside the quotes:
             /// </summary>
-            public static string GoogleDriveFolderId = "1HgOgKPgUV0j-7Z8eCWJAfryy6YkLpMSb";
+            public static string GoogleDriveFolderId = "1okwb05uVHVzv20u8KnsJ0NByJOaHpjia"; // >100 files: 1okwb05uVHVzv20u8KnsJ0NByJOaHpjia     sanity test: 1HgOgKPgUV0j-7Z8eCWJAfryy6YkLpMSb
 
             /// <summary>
             /// The name of the TTS Save File to create.
@@ -45,6 +45,11 @@ namespace TTSBulkImporter
             /// The color tint that all the game pieces will have.
             /// </summary>
             public static ColorDiffuse TintColor = HeroesSystemConfig.Colors.Pink;
+
+            /// <summary>
+            /// TODO: Add support for this.
+            /// </summary>
+            public static float TokenThickness = 0.16f;
         }
 
         static void Main(string[] args)

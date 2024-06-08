@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Net.Http;
 using System.Text;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
@@ -15,11 +15,14 @@ namespace TTSBulkImporter.GoogleDrive
     /// </summary>
     public class DriveScanner
     {
-        private DriveService Service { get; }
+        // Source: https://developers.google.com/drive/api/guides/performance#batch-requests
+        private const int MaxRequestsPerBatch = 100;
+
+        private DriveService DriveService { get; }
 
         public DriveScanner(DriveService service)
         {
-            Service = service;
+            DriveService = service;
         }
 
         /// <summary>
@@ -28,7 +31,7 @@ namespace TTSBulkImporter.GoogleDrive
         /// </summary>
         public DriveFolder GetFilesystemFrom(string folderFileId)
         {
-            var getRequest = Service.Files.Get(folderFileId);
+            var getRequest = DriveService.Files.Get(folderFileId);
             getRequest.Fields = "id, name, mimeType, trashed";
 
             // Validate root folder.
@@ -60,51 +63,21 @@ namespace TTSBulkImporter.GoogleDrive
         }
 
         /// <summary>
-        /// Make all files and folders publicly shareable so that "Anyone with the link can view."
-        /// This the same as clicking "Get shareable link" on a file in Google Drive.
+        /// Make all files and folders (including nested ones) publicly shareable so that "Anyone with the link can view."
+        /// This the same as clicking "Get shareable link" on each file and fodler in Google Drive.
         /// </summary>
         public void MakeFilesystemShareable(DriveFolder rootFolder)
         {
-            GrantPermissionAnyoneWithLinkTo(rootFolder.Id);
-            foreach (var file in rootFolder.Files)
-            {
-                GrantPermissionAnyoneWithLinkTo(file.Id);
-            }
+            List<DriveObject> filesAndFolders = new List<DriveObject>();
+            filesAndFolders.Add(rootFolder);
+            filesAndFolders.AddRange(rootFolder.Files);
+
+            BatchGrantPermissionAnyoneWithLinkTo(filesAndFolders);
+
             foreach (var folder in rootFolder.Folders)
             {
                 MakeFilesystemShareable(folder);
             }
-        }
-
-        /// <summary>
-        /// Return the files and folders contained immediately within the provided folder (i.e. non-recursively).
-        /// Does not include trashed files.
-        /// </summary>
-        private IEnumerable<File> GetItemsInFolder(string folderFileId)
-        {
-            FilesResource.ListRequest request = Service.Files.List();
-            request.PageSize = 1000;
-            request.Q = $"'{folderFileId}' in parents and trashed=false";
-            request.Fields = "files(id, name, mimeType)";
-
-            var response = request.Execute();
-
-            return response.Files;
-        }
-
-        /// <summary>
-        /// Grants permission on the file so that "Anyone with the link can view." This the same as clicking "Get shareable link" on a file in Google Drive.
-        /// </summary>
-        /// <param name="fileId">The ID of the file.</param>
-        private void GrantPermissionAnyoneWithLinkTo(string fileId)
-        {
-            var permission = new Permission();
-            permission.Role = "reader";
-            permission.Type = "anyone";
-
-            Service.Permissions.Create(permission, fileId).Execute();
-
-            Console.WriteLine("Created permission: 'Anyone with the link can view.' on file: " + fileId);
         }
 
         /// <summary>
@@ -132,6 +105,91 @@ namespace TTSBulkImporter.GoogleDrive
             {
                 Console.WriteLine("No files found.");
             }
+        }
+
+        /// <summary>
+        /// Return the files and folders contained immediately within the provided folder (i.e. non-recursively).
+        /// Does not include trashed files.
+        /// </summary>
+        private IEnumerable<File> GetItemsInFolder(string folderFileId)
+        {
+            FilesResource.ListRequest request = DriveService.Files.List();
+            request.PageSize = 1000;
+            request.Q = $"'{folderFileId}' in parents and trashed=false";
+            request.Fields = "files(id, name, mimeType)";
+
+            var response = request.Execute();
+
+            return response.Files;
+        }
+
+        /// <summary>
+        /// Grants permission to all the provided files so that "Anyone with the link can view." This the same as clicking "Get shareable link" on each of those files in Google Drive.
+        /// </summary>
+        /// <param name="files">The files and folders to change permission for.</param>
+        private void BatchGrantPermissionAnyoneWithLinkTo(ICollection<DriveObject> files)
+        {
+            // TODO: Observe limits:
+            // Max 8,000 character limit on length of URL for each "inner request" (from https://developers.google.com/drive/api/guides/performance#batch-requests)
+
+            foreach (var chunk in files.Chunk(MaxRequestsPerBatch))
+            {
+                // Queue Requests:
+                var batchRequest = new BatchRequest(DriveService);
+                BatchRequest.OnResponse<Permission> callback = delegate (
+                    Permission permission,
+                    RequestError error,
+                    int index,
+                    HttpResponseMessage message)
+                {
+                    if (error != null)
+                    {
+                        throw new InvalidOperationException(error.Message);
+                    }
+                };
+
+                var filePermission = CreatePublicReadonlyPermission();
+
+                foreach (var file in chunk)
+                {
+                    var request = DriveService.Permissions.Create(filePermission, file.Id);
+                    batchRequest.Queue(request, callback);
+                }
+
+                // Execute Requests Batch:
+                var task = batchRequest.ExecuteAsync();
+                task.Wait();
+
+                Console.WriteLine($"Changed permission of {files.Count} files to: 'Anyone with the link can view.'");
+                Console.WriteLine($"Files/Folders:");
+                foreach (var file in files)
+                {
+                    Console.WriteLine($"Name: {file.Name}, ID: {file.Id}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Grants permission on the file so that "Anyone with the link can view." This the same as clicking "Get shareable link" on the file in Google Drive.
+        /// </summary>
+        /// <param name="fileId">The ID of the file.</param>
+        private void GrantPermissionAnyoneWithLinkTo(string fileId)
+        {
+            var permission = CreatePublicReadonlyPermission();
+
+            var request = DriveService.Permissions.Create(permission, fileId);
+            request.Execute();
+
+            Console.WriteLine("Created permission: 'Anyone with the link can view.' on file: " + fileId);
+        }
+
+        private Permission CreatePublicReadonlyPermission()
+        {
+            return new Permission()
+            {
+                Type = "anyone",
+                Role = "reader"
+            };
         }
     }
 }
