@@ -6,6 +6,7 @@ import re
 
 
 MINIMUM_PADDING = 3
+HIDDEN_FILE_PREFIX = "."
 
 
 def main():
@@ -43,11 +44,14 @@ def main():
     working_directory = os.getcwd()
     print(f"Working Directory: {working_directory}")
 
-    # Get files in working directory:
-    files = [file for file in os.listdir(working_directory) if os.path.isfile(file)]
+    # Get files in working directory, excluding hidden files:
+    files = [
+        file for file
+        in os.listdir(working_directory)
+        if os.path.isfile(file) and not file.startswith(HIDDEN_FILE_PREFIX)]
 
     if is_odd(len(files)):
-        print(f"ERROR: There are an odd number of files in the working directory. Stopping.")
+        print(f"ERROR: There are an odd number of files in the working directory (not counting hidden files). Stopping.")
         return
 
     files = natural_sort(files)
@@ -88,7 +92,7 @@ class ProgramArguments:
         parser.add_argument('-t', '--target-directory', default='', type=str,
                             help='Absolute path to the directory to rename the files in. Defaults to the current '
                                  'directory.')
-        parser.add_argument('-p', '--output-prefix', default='', type=str,
+        parser.add_argument('-o', '--output-prefix', default='', type=str,
                             help='Prefix to add to the renamed files. Defaults to no prefix.',
                             metavar='PREFIX')
         return parser
