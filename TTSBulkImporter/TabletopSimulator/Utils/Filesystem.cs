@@ -10,10 +10,7 @@ namespace TTSBulkImporter.TabletopSimulator.Utils
         public static DirectoryInfo GetSolutionRootDirectory()
         {
             var currentDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
-            return currentDirectory.Parent.Parent.Parent;
-
-            //var currentDirectory = Directory.GetCurrentDirectory();
-            //return Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent;
+            return currentDirectory.Parent.Parent.Parent.Parent;
         }
     }
 }
