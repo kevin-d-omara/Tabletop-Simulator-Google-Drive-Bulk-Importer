@@ -29,8 +29,15 @@ namespace TTSBulkImporter.GoogleDrive
         /// Get the entire hierarchy of files and folders nested within the provided folder.
         /// Excludes trashed files and folders.
         /// </summary>
-        public DriveFolder GetFilesystemFrom(string folderFileId)
+        public DriveFolder GetFilesystemFrom(string folderFileId, bool isRoot = true)
         {
+            if (isRoot)
+            {
+                Console.WriteLine("");
+                Console.WriteLine($"Scanning the target Google Drive folder ({folderFileId}) to obtain the file structure.");
+                Console.WriteLine("(This may take up to 1 minute.)");
+            }
+
             var getRequest = DriveService.Files.Get(folderFileId);
             getRequest.Fields = "id, name, mimeType, trashed";
 
@@ -56,9 +63,13 @@ namespace TTSBulkImporter.GoogleDrive
             var folders = itemsInFolder.Where(file => file.MimeType == MimeTypes.Folder);
             foreach (var folder in folders)
             {
-                rootDriveFolder.Folders.Add(GetFilesystemFrom(folder.Id));
+                rootDriveFolder.Folders.Add(GetFilesystemFrom(folder.Id, isRoot = false));
             }
 
+            if (isRoot)
+            {
+                Console.WriteLine("Success!");
+            }
             return rootDriveFolder;
         }
 

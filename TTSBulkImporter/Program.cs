@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Google.Apis.Drive.v3;
+using System;
 using TTSBulkImporter.GoogleDrive;
 using TTSBulkImporter.Importer;
 using TTSBulkImporter.TabletopSimulator;
@@ -33,11 +34,38 @@ namespace TTSBulkImporter
             ///                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             /// Then copy the part with ^^^^ and paste it below inside the quotes:
             /// </summary>
-            public static string GoogleDriveFolderId = "1okwb05uVHVzv20u8KnsJ0NByJOaHpjia"; // >100 files: 1okwb05uVHVzv20u8KnsJ0NByJOaHpjia     sanity test: 1HgOgKPgUV0j-7Z8eCWJAfryy6YkLpMSb
+            public static string GoogleDriveFolderId = "1HgOgKPgUV0j-7Z8eCWJAfryy6YkLpMSb";
+
+            /// <summary>
+            /// If 'true':
+            ///     Sequential files (in "natural sort" order, similar to alphabetical order) are matched together as
+            ///     double-sided tiles.
+            ///
+            ///     For example:
+            ///         PZL B1_ART_V0.1.png  -> Tile 1, Front Side
+            ///         PZL B1_ART_V0.2.png  -> Tile 1, Back Side
+            ///         PZL B1_ART_V0.3.png  -> Tile 2, Front Side
+            ///         PZL B1_ART_V0.4.png  -> Tile 2, Back Side
+            ///
+            ///     The program will crash if there is an odd number of files in any of the folders, because
+            ///     that indicates the user may have not uploaded a full set of matching front/back images.
+            ///
+            /// If 'false':
+            ///     Double sided tiles are matched when the two images have identical names except for having an .A/.B
+            ///     suffix.
+            ///
+            ///     For example:
+            ///         PZL B1_ART_V0.1.A.png  -> Tile 1, Front Side
+            ///         PZL B1_ART_V0.1.B.png  -> Tile 1, Back Side
+            ///         PZL B1_ART_V0.2.A.png  -> Tile 2, Front Side
+            ///         PZL B1_ART_V0.2.B.png  -> Tile 2, Back Side
+            /// </summary>
+            public static bool MatchSequentialFilesAsDoubleSided = true;
 
             /// <summary>
             /// The name of the TTS Save File to create.
-            /// The file will be created in the root folder ("Tabletop-Simulator-Google-Drive-Bulk-Importer", the same folder containing the ".sln" file).
+            /// The file will be created in the root folder ("Tabletop-Simulator-Google-Drive-Bulk-Importer", the same
+            /// folder containing the ".sln" file).
             /// </summary>
             public static string TabletopSimulatorSaveFileName = "TTS Bulk Import Save File.json";
 
@@ -60,7 +88,8 @@ namespace TTSBulkImporter
 
             // Convert files to TTS game pieces
             var converter = new Converter(Settings.TintColor);
-            var bag = converter.ConvertFolderToBag(modRootFolder, isRoot: true);
+            var bag = converter.ConvertFolderToBag(modRootFolder, isRoot: true,
+                matchSequentialFilesAsDoubleSided: Settings.MatchSequentialFilesAsDoubleSided);
 
             // Make files shareable with public
             service.MakeFilesystemShareable(modRootFolder);

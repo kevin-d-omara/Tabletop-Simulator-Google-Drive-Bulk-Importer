@@ -39,7 +39,7 @@ namespace TTSBulkImporter.Importer
             TintColor = tintColor;
         }
 
-        public BagGamePiece ConvertFolderToBag(DriveFolder driveFolder, bool isRoot = false, bool addLuaScript=false)
+        public BagGamePiece ConvertFolderToBag(DriveFolder driveFolder, bool isRoot = false, bool addLuaScript=false, bool matchSequentialFilesAsDoubleSided = false)
         {
             var bag = new BagGamePiece();
             bag.Nickname = driveFolder.Name;
@@ -58,8 +58,10 @@ namespace TTSBulkImporter.Importer
 
             // Create TTS objects.
             var tokens = tokenFiles.Select(ConvertToToken).ToList();
-            var tiles = ConvertToTiles(tileFiles).ToList();
-            var bags = driveFolder.Folders.Select(x => ConvertFolderToBag(x, addLuaScript)).ToList();
+            var tiles = ConvertToTiles(tileFiles, matchSequentialFilesAsDoubleSided).ToList();
+            var bags = driveFolder.Folders.Select(x => ConvertFolderToBag(x,
+                addLuaScript: addLuaScript,
+                matchSequentialFilesAsDoubleSided: matchSequentialFilesAsDoubleSided)).ToList();
 
             // Add objects to bag.
             bag.ContainedObjects = bag.ContainedObjects
@@ -113,7 +115,7 @@ namespace TTSBulkImporter.Importer
             return token;
         }
 
-        private TileGamePiece ConvertToTile(DriveFile file)
+        private TileGamePiece ConvertToTileSingleSided(DriveFile file)
         {
             var tile = new TileGamePiece();
             tile.Nickname = AsValidNickname(file.Name);
@@ -123,7 +125,7 @@ namespace TTSBulkImporter.Importer
             return tile;
         }
 
-        private TileGamePiece ConvertToTile(DriveFile fileA, DriveFile fileB)
+        private TileGamePiece ConvertToTileDoubleSided(DriveFile fileA, DriveFile fileB)
         {
             var tile = new TileGamePiece();
             tile.Nickname = AsValidNickname(fileA.Name);
@@ -135,9 +137,39 @@ namespace TTSBulkImporter.Importer
         }
 
         /// <summary>
-        /// Transform the files (in one folder) into Tiles. Matches double-sided images together and the remaining as single-sided.
+        /// Transform the files (in one folder) into Tiles.
         /// </summary>
-        private IEnumerable<TileGamePiece> ConvertToTiles(IEnumerable<DriveFile> files)
+        private IEnumerable<TileGamePiece> ConvertToTiles(IEnumerable<DriveFile> files, bool matchSequentialFilesAsDoubleSided)
+        {
+            return matchSequentialFilesAsDoubleSided
+                ? ConvertToTilesMatchingSequential(files)
+                : ConvertToTilesMatchingAB(files);
+        }
+
+        private IEnumerable<TileGamePiece> ConvertToTilesMatchingSequential(IEnumerable<DriveFile> files)
+        {
+            var filesList = files.ToList();
+            if (!IsEvenNumber(filesList.Count))
+            {
+                throw new ArgumentException($"There is an odd number of files ({filesList.Count}). Cannot match sequential images as front/back because there is an odd number.");
+            }
+
+            filesList.Sort(new PropertyComparer<DriveFile, string>(
+                comparer: new NaturalComparer(),
+                accessor: (DriveFile driveFile) => driveFile.Name));
+
+            var tiles = new List<TileGamePiece>();
+            for (int i = 0; i < filesList.Count - 1; i+=2)
+            {
+                var fileA = filesList[i];
+                var fileB = filesList[i+1];
+                tiles.Add(ConvertToTileDoubleSided(fileA, fileB));
+            }
+
+            return tiles;
+        }
+
+        private IEnumerable<TileGamePiece> ConvertToTilesMatchingAB(IEnumerable<DriveFile> files)
         {
             var tiles = new List<TileGamePiece>();
 
@@ -163,7 +195,7 @@ namespace TTSBulkImporter.Importer
                 DriveFile fileB;
                 if (sideBMap.TryGetValue(sideAPattern.Replace(fileA.Name, ""), out fileB))
                 {
-                    tiles.Add(ConvertToTile(fileA, fileB));
+                    tiles.Add(ConvertToTileDoubleSided(fileA, fileB));
                 }
                 else
                 {
@@ -174,7 +206,7 @@ namespace TTSBulkImporter.Importer
             // Create single-sided Tiles.
             foreach (var file in singleSides)
             {
-                tiles.Add(ConvertToTile(file));
+                tiles.Add(ConvertToTileSingleSided(file));
             }
 
             return tiles;
@@ -207,6 +239,11 @@ namespace TTSBulkImporter.Importer
             {
                 piece.Nickname = "";
             }
+        }
+
+        private bool IsEvenNumber(int x)
+        {
+            return x % 2 == 0;
         }
     }
 }
