@@ -1,8 +1,9 @@
-﻿from typing import Iterable
-import os
-import argparse
+﻿import argparse
+from argparse import Action
 from dataclasses import dataclass
+import os
 import re
+from typing import Iterable, List
 
 
 MINIMUM_PADDING = 3
@@ -11,7 +12,7 @@ HIDDEN_FILE_PREFIX = "."
 
 def main():
     """
-    This program renames all files in the specified folder (non-recursively) to be compatible with the TTS Importer.
+    This program renames all files in the specified folder to be compatible with the TTS Importer.
 
     Run it with -h to see the usage instructions.
 
@@ -36,28 +37,101 @@ def main():
     args = ProgramArguments.get_program_arguments()
     print(f"Running script {os.path.basename(__file__)} with arguments:")
     print(args)
+    print()
 
     # Change working directory to the target directory:
     if args.target_directory:
         os.chdir(args.target_directory)
 
     working_directory = os.getcwd()
-    print(f"Working Directory: {working_directory}")
+    print(f"Starting Directory: {working_directory}")
+    print()
 
-    # Get files in working directory, excluding hidden files:
+    # Recursively walk through all directories.
+    # Note: os.walk automatically recurses for us, so we don't need to call it on each subdirectory.
+    directories_with_error = []
+    for current_directory, subdirectories, files in os.walk(working_directory):
+        os.chdir(current_directory)
+        if args.dry_run:
+            print(f"Validating filenames in {current_directory}")
+        else:
+            print(f"Renaming filenames in: {current_directory}")
+
+        if not rename_filenames(files, args.output_prefix, args.dry_run):
+            directories_with_error.append(current_directory)
+
+        print()
+        if not args.recursive:
+            break
+
+    print()
+    num_directories_with_error = len(directories_with_error)
+    if num_directories_with_error == 0:
+        if args.dry_run:
+            print(f"SUCCESS SUCCESS SUCCESS ===> There were no errors detected in any directory.")
+        else:
+            print(f"SUCCESS SUCCESS SUCCESS ===> Renamed files in all directories.")
+    else:
+        action = '' if args.dry_run else 'Renamed files in all other directories.'
+        if num_directories_with_error == 1:
+            print(f"ERROR ERROR ERROR ===> There was 1 directory with an error. Scroll up to see the issues in that "
+                  f"directory. {action}")
+        else:
+            print(f"ERROR ERROR ERROR ===> There were {num_directories_with_error} directories with an error. Scroll "
+                  f"up to see the issues in each directory. {action}")
+
+
+@dataclass
+class ProgramArguments:
+    target_directory: str
+    output_prefix: str
+    recursive: bool
+    dry_run: bool
+
+    @staticmethod
+    def get_program_arguments() -> 'ProgramArguments':
+        """Get a new instance of ProgramArguments by parsing the program's arguments."""
+        parser = ProgramArguments.get_argument_parser()
+        args = parser.parse_args()
+        return ProgramArguments(**vars(args))
+
+    @staticmethod
+    def get_argument_parser() -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser(description='See the script for details.')
+        parser.add_argument('-t', '--target-directory', default='', type=str,
+                            help='Absolute path to the directory to rename the files in. Defaults to the current '
+                                 'directory.')
+        parser.add_argument('-o', '--output-prefix', default='', type=str,
+                            help='Prefix to add to the renamed files. Defaults to no prefix.')
+        parser.add_argument('-r', '--recursive', action='store_true',
+                            help='If true, executes recursively inside each folder. Defaults to False.')
+        parser.add_argument('-d', '--dry-run', action='store_true',
+                            help='If true, checks filenames without renaming them. It\'s a good idea to do a dry-run '
+                                 'before renaming files in case there are any naming issues. Defaults to False.')
+        return parser
+
+
+def rename_filenames(filenames: List[str], prefix: str, dry_run: bool = False) -> bool:
+    # Exclude hidden files:
     files = [
-        file for file
-        in os.listdir(working_directory)
-        if os.path.isfile(file) and not file.startswith(HIDDEN_FILE_PREFIX)]
+        filename for filename
+        in filenames
+        if not filename.startswith(HIDDEN_FILE_PREFIX)
+    ]
 
     if is_odd(len(files)):
-        print(f"ERROR: There are an odd number of files in the working directory (not counting hidden files). Stopping.")
-        return
+        if dry_run:
+            print(f"ERROR: There are an odd number of files.")
+        else:
+            print(f"ERROR: There are an odd number of files. Skipping this directory.")
+        return False
+
+    if dry_run:
+        return True
 
     files = natural_sort(files)
 
     # Rename files:
-    prefix = args.output_prefix
     padding_width = max(MINIMUM_PADDING, num_digits(len(files)))
     token_number = 1
     for side_a_file, side_b_file in group_as_pairs(files):
@@ -73,29 +147,8 @@ def main():
 
         token_number += 1
 
-
-@dataclass
-class ProgramArguments:
-    target_directory: str
-    output_prefix: str
-
-    @staticmethod
-    def get_program_arguments() -> 'ProgramArguments':
-        """Get a new instance of ProgramArguments by parser the program's arguments."""
-        parser = ProgramArguments.get_argument_parser()
-        args = parser.parse_args()
-        return ProgramArguments(**vars(args))
-
-    @staticmethod
-    def get_argument_parser() -> argparse.ArgumentParser:
-        parser = argparse.ArgumentParser(description='See the script for details.')
-        parser.add_argument('-t', '--target-directory', default='', type=str,
-                            help='Absolute path to the directory to rename the files in. Defaults to the current '
-                                 'directory.')
-        parser.add_argument('-o', '--output-prefix', default='', type=str,
-                            help='Prefix to add to the renamed files. Defaults to no prefix.',
-                            metavar='PREFIX')
-        return parser
+    print(f"SUCCESS. Renamed all files in this directory.")
+    return True
 
 
 def is_odd(number: int) -> bool:
